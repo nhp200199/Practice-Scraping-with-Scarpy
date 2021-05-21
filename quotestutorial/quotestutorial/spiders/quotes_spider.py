@@ -4,8 +4,9 @@ import scrapy
 class QuoteSpider(scrapy.Spider):
     name = 'quotes'
     start_urls = [
-        'http://quotes.toscrape.com/'
+        'http://quotes.toscrape.com/page/1/'
     ]
+    page_number = 2
 
     def parse(self, response):
         all_div_quotes = response.css(".quote")
@@ -22,7 +23,8 @@ class QuoteSpider(scrapy.Spider):
             item['tags'] = tags
             yield item
         
-        next_page = response.css('li.next a::attr(href)').get()
+        next_page = f'http://quotes.toscrape.com/page/{QuoteSpider.page_number}/'
 
-        if next_page is not None:
+        if QuoteSpider.page_number < 11:
+            QuoteSpider.page_number += 1
             yield response.follow(next_page, callback = self.parse)
